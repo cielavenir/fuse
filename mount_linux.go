@@ -61,6 +61,15 @@ func mount(dir string, conf *mountConfig) (fusefd *os.File, err error) {
 		return nil, fmt.Errorf("socketpair error: %v", err)
 	}
 
+	_, _, errno0 := syscall.Syscall(syscall.SYS_FCNTL, uintptr(fds[0]), syscall.F_SETFD, syscall.FD_CLOEXEC)
+	if errno0 != 0 {
+		return nil, fmt.Errorf("could not set FD_CLOEXEC (%d)", errno0)
+	}
+	_, _, errno1 := syscall.Syscall(syscall.SYS_FCNTL, uintptr(fds[1]), syscall.F_SETFD, syscall.FD_CLOEXEC)
+	if errno1 != 0 {
+		return nil, fmt.Errorf("could not set FD_CLOEXEC (%d)", errno1)
+	}
+
 	writeFile := os.NewFile(uintptr(fds[0]), "fusermount-child-writes")
 	defer writeFile.Close()
 
