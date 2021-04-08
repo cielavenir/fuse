@@ -7,7 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	"sync"
+	//"sync"
 	"syscall"
 )
 
@@ -76,7 +76,9 @@ func mount(dir string, conf *mountConfig) (fusefd *os.File, err error) {
 	cmd.Env = append(os.Environ(), "_FUSE_COMMFD=3")
 
 	cmd.ExtraFiles = []*os.File{writeFile}
-
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+/*
 	var wg sync.WaitGroup
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -86,15 +88,18 @@ func mount(dir string, conf *mountConfig) (fusefd *os.File, err error) {
 	if err != nil {
 		return nil, fmt.Errorf("setting up fusermount stderr: %v", err)
 	}
-
+*/
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("fusermount: %v", err)
 	}
+
 	helperErrCh := make(chan error, 1)
+/*
 	wg.Add(2)
 	go lineLogger(&wg, "mount helper output", neverIgnoreLine, stdout)
 	go lineLogger(&wg, "mount helper error", handleFusermountStderr(helperErrCh), stderr)
 	wg.Wait()
+*/
 	if err := cmd.Wait(); err != nil {
 		// see if we have a better error to report
 		select {
